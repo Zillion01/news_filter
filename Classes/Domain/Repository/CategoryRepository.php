@@ -2,14 +2,20 @@
 
 namespace GeorgRinger\NewsFilter\Domain\Repository;
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
+
 class CategoryRepository extends \GeorgRinger\News\Domain\Repository\CategoryRepository
 {
     /**
      * Find categories by a given pid
      *
-     * @param array $idList list of id s
-     * @param array $ordering ordering
-     * @return QueryInterface
+     * @param array $idList
+     * @param array $ordering
+     * @param $startingPoint
+     * @return QueryResultInterface
+     * @throws InvalidQueryException
      */
     public function findByIdListWithLanguageSupport(array $idList, array $ordering = [], $startingPoint = null)
     {

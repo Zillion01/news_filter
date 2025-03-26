@@ -7,10 +7,11 @@ if (!defined('TYPO3')) {
 $GLOBALS['TYPO3_CONF_VARS']['EXT']['news']['Domain/Repository/AbstractDemandedRepository.php']['findDemanded']['news_filter']
     = \GeorgRinger\NewsFilter\Hooks\Repository::class . '->modify';
 
-$vars = \TYPO3\CMS\Core\Utility\GeneralUtility::_POST('tx_news_pi1');
+$vars = \GeorgRinger\NewsFilter\Utility\DeprecatedUtility::_POST('tx_news_pi1');
 if (isset($vars['search']) && is_array($vars['search'])) {
-    foreach (['Pi1', 'NewsListSticky', 'NewsSelectedList'] as $pluginName)
-    $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['extensions']['News']['plugins'][$pluginName]['controllers'][\GeorgRinger\News\Controller\NewsController::class]['nonCacheableActions'][] = 'list';
+    foreach (['Pi1', 'NewsListSticky', 'NewsSelectedList'] as $pluginName) {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['extensions']['News']['plugins'][$pluginName]['controllers'][\GeorgRinger\News\Controller\NewsController::class]['nonCacheableActions'][] = 'list';
+    }
 }
 
 $GLOBALS['TYPO3_CONF_VARS']['EXT']['news']['classes']['Domain/Repository/CategoryRepository'][] = 'news_filter';

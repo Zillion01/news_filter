@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace GeorgRinger\NewsFilter\EventListener;
 
 use GeorgRinger\News\Domain\Model\Dto\NewsDemand;
-use GeorgRinger\News\Domain\Repository\CategoryRepository;
 use GeorgRinger\News\Domain\Repository\TagRepository;
 use GeorgRinger\News\Event\NewsListActionEvent;
 use GeorgRinger\News\Utility\Page;
 use GeorgRinger\NewsFilter\Domain\Model\Dto\Search;
+use GeorgRinger\NewsFilter\Domain\Repository\CategoryRepository;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Property\Exception;
 use TYPO3\CMS\Extbase\Property\PropertyMapper;
 
 class NewsListActionEventListener
@@ -37,7 +39,11 @@ class NewsListActionEventListener
         $this->propertyMapper = $propertyMapper;
     }
 
-    public function __invoke(NewsListActionEvent $event)
+    /**
+     * @throws Exception
+     * @throws AspectNotFoundException
+     */
+    public function __invoke(NewsListActionEvent $event): void
     {
         $data = $event->getAssignedValues();
         $settings = $data['settings'];
@@ -45,7 +51,7 @@ class NewsListActionEventListener
         if ($settings['enableFilter'] ?? false) {
             $search = GeneralUtility::makeInstance(Search::class);
 
-            $vars = GeneralUtility::_POST('tx_news_pi1');
+            $vars = $GLOBALS['TYPO3_REQUEST']->getParsedBody()['tx_news_pi1'] ?? null;
             if (isset($vars['search']) && is_array($vars['search'])) {
                 /** @var Search $search */
                 $search = $this->propertyMapper->convert($vars['search'], Search::class);
@@ -86,6 +92,9 @@ class NewsListActionEventListener
         $event->setAssignedValues($data);
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function getAllRecordsByPid(string $tableName, string $pidList): array
     {
         $list = [];
@@ -100,8 +109,8 @@ class NewsListActionEventListener
                     $queryBuilder->createNamedParameter(explode(',', $pidList), Connection::PARAM_INT_ARRAY)
                 )
             )
-            ->execute()
-            ->fetchAll();
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         foreach ($rows as $row) {
             $list[] = $row['uid'];

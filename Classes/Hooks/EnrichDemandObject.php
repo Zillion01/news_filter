@@ -6,7 +6,6 @@ namespace GeorgRinger\NewsFilter\Hooks;
 
 use GeorgRinger\NewsFilter\Domain\Model\Dto\Demand;
 use GeorgRinger\NewsFilter\Domain\Model\Dto\Search;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Property\PropertyMapper;
 
 class EnrichDemandObject
@@ -28,7 +27,7 @@ class EnrichDemandObject
         $settings = $params['settings'];
 
         if ($settings['enableFilter'] ?? false) {
-            $vars = GeneralUtility::_POST('tx_news_pi1');
+            $vars = $GLOBALS['TYPO3_REQUEST']->getParsedBody()['tx_news_pi1'] ?? null;
             if (isset($vars['search']) && is_array($vars['search'])) {
                 /** @var Search $search */
                 $search = $this->propertyMapper->convert($vars['search'], Search::class);
